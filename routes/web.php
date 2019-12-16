@@ -11,6 +11,32 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('login', 'Auth\LoginController@login');
+Route::post('logout', 'Auth\LoginController@logout')->name('logout');
+
+Route::get('password/reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('password.update');
+Route::get('password/change', 'Auth\ChangePasswordController@showChangeForm')->name('password.change_form');
+Route::post('password/change', 'Auth\ChangePasswordController@change')->name('password.change');
+
+Route::group(['middleware' => ['isAdmin']], function () {
+    
+    Route::get('users', 'UserController@index')->name('users.index');
+    Route::post('users', 'UserController@store')->name('users.store');
+    Route::get('users/create', 'UserController@create')->name('users.create');
+    Route::get('users/{user}/edit', 'UserController@edit')->name('users.edit');
+    Route::put('users/{user}', 'UserController@update')->name('users.update');
+    Route::delete('users/{user}', 'UserController@destroy')->name('users.destroy');
+
 });
+
+Route::get('teams', 'TeamController@index')->name('teams.index');
+Route::get('teams/create', 'TeamController@create')->name('teams.create');
+Route::get('teams/{team}', 'TeamController@show')->name('teams.show');
+Route::post('teams', 'TeamController@store')->name('teams.store');
+Route::get('teams/{team}/edit', 'TeamController@edit')->name('teams.edit');
+Route::put('teams/{team}', 'TeamController@update')->name('teams.update');
+Route::delete('teams/{team}', 'TeamController@delete')->name('teams.delete');
