@@ -29,7 +29,8 @@ class UserStoreRequest extends FormRequest
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',
             'password' => 'required|min:8|string|confirmed',
-            'contract_date' => 'required|date'
+            'contract_date' => 'required|date',
+            'team_id' => 'exists:teams,id|nullable'
         ];
     }
 }

@@ -27,7 +27,8 @@ class UserUpdateRequest extends FormRequest
             'role_id' => 'required|integer',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'contract_date' => 'required|date'
+            'contract_date' => 'required|date',
+            'team_id' => 'exists:teams,id|nullable'
         ];
     }
 }

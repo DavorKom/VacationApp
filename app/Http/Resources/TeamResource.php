@@ -19,7 +19,8 @@ class TeamResource extends Transformer
             'id' => $this->id,
             'name' => $this->name,
             'project_manager' => (new UserResource($this->whenLoaded('projectManager')))->all(request()),
-            'team_lead' => (new UserResource($this->whenLoaded('teamLead')))->all(request())
+            'team_lead' => (new UserResource($this->whenLoaded('teamLead')))->all(request()),
+            'users' => UserResource::collection($this->whenLoaded('users'))->toArray(request())
         ];
     }
 }

@@ -15,11 +15,8 @@ class TeamController extends Controller
 
     public function index()
     {   
-        $teams = Team::with('projectManager', 'teamLead')->get();
-
-        $teams = TeamResource::collection($teams)->toArray(request());
-
-        dd($teams);
+        $teams = Team::with('projectManager', 'teamLead', 'projectManager.teams', 'teamLead.teams', 'users', 'users.teams')->get();
+        $teams = TeamResource::collection($teams)->all(request());
 
         return view('teams.index')->with([
             'teams' => $teams
@@ -28,14 +25,12 @@ class TeamController extends Controller
 
     public function show(Team $team)
     {
-        $team = Team::with('projectManager', 'teamLead')->find($team->id);
-
-        $team = (new TeamResource($team))->toArray(request());
+        $team = Team::with('projectManager', 'teamLead', 'projectManager.teams', 'teamLead.teams', 'users', 'users.teams')->find($team->id);
+        $team = (new TeamResource($team))->all(request());
 
         return view('teams.show')->with([
             'team' => $team
         ]);
-        
     }
 
     public function store(TeamStoreRequest $request)
@@ -51,7 +46,8 @@ class TeamController extends Controller
 
     public function create()
     {
-        $users = UserResource::collection(User::all())->toArray(request());
+        $users = User::with('teams')->get();
+        $users = UserResource::collection($users)->all(request());
 
         return view('teams.create')->with([
             'users' => $users,
@@ -59,8 +55,9 @@ class TeamController extends Controller
     }
 
     public function edit(Team $team)
-    {
-        $users = UserResource::collection(User::all())->toArray(request());
+    {   
+        $users = User::with('teams')->get();
+        $users = UserResource::collection($users)->all(request());
 
         return view('teams.edit')->with([
             'team' => $team,

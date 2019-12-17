@@ -22,6 +22,8 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('passw
 Route::get('password/change', 'Auth\ChangePasswordController@showChangeForm')->name('password.change_form');
 Route::post('password/change', 'Auth\ChangePasswordController@change')->name('password.change');
 
+Route::get('/', 'HomeController@index')->name('home');
+
 Route::group(['middleware' => ['isAdmin']], function () {
     
     Route::get('users', 'UserController@index')->name('users.index');

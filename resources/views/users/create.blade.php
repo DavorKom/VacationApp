@@ -27,6 +27,14 @@
             </select>
         </div>
         <div class="form-group">
+            <select name="team_id" class="form-control">
+                <option value="{{ null }}">Odaberi Tim:</option>
+                @foreach($teams as $team)
+                    <option value="{{ $team['id'] }}">{{ $team['name'] }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="form-group">
             <input type="date" class="form-control" name="contract_date" value="{{ old('contract_date') }}" required>
         </div>
         <div class="form-group">

@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password', 'contract_date', 'roll_id'
+        'first_name', 'last_name', 'email', 'password', 'contract_date', 'roll_id', 'team_id'
     ];
 
     /**
@@ -51,7 +51,7 @@ class User extends Authenticatable
 
     public function teams()
     {
-        return $this->belongsToMany(Team::class);
+        return $this->belongsToMany(Team::class)->withTimestamps();
     }
 
     public function teamProjectManager()
@@ -62,5 +62,15 @@ class User extends Authenticatable
     public function teamTeamLead()
     {
         return $this->hasOne(Team::class, 'team_lead_id');
+    }
+
+    public function scopeSearch($query, $search)
+    {   
+        if ($search == null) {
+            return $query;
+        }
+
+        return $query->where('first_name', 'LIKE', "%{$search}%")
+            ->orWhere('last_name', 'LIKE', "%{$search}%");
     }
 }

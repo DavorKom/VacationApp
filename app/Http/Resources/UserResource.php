@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Contracts\Http\Resource\Transformer;
 use App\Http\Resources\RoleResource;
 use App\Http\Resources\DateTimeResource;
+use App\Http\Resources\BasicTeamResource;
 
 class UserResource extends Transformer
 {
@@ -18,12 +19,13 @@ class UserResource extends Transformer
     {   
         return [
             'id' => $this->id,
-            'role' => (new RoleResource($this->role))->toArray($request),
+            'role' => (new RoleResource($this->role))->all($request),
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'full_name' => $this->full_name,
             'email' => $this->email,
-            'contract_date' => (new DateTimeResource($this->contract_date))->toArray($request)
+            'contract_date' => (new DateTimeResource($this->contract_date))->all($request),
+            'teams' => BasicTeamResource::collection($this->whenLoaded('teams'))->toArray($request)
         ];
     }
 }

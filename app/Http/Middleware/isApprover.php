@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Models\Role;
 
-class IsAdmin
+class isApprover
 {
     /**
      * Handle an incoming request.
@@ -18,7 +18,7 @@ class IsAdmin
     {
         $user_role = Role::find(auth()->user()->role_id);
 
-        if(!($user_role->slug === Role::ADMIN)){
+        if (!($user_role->slug === Role::APPROVER)) {
             return redirect()->route('home');
         };
 
