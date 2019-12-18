@@ -10,8 +10,14 @@ use App\Http\Resources\TeamResource;
 use App\Http\Requests\TeamStoreRequest;
 use App\Http\Requests\TeamUpdateRequest;
 
+
 class TeamController extends Controller
 {
+
+    public function __construct()
+    {
+        //$this->middleware('admin')->except('show');
+    }
 
     public function index()
     {   
@@ -41,6 +47,14 @@ class TeamController extends Controller
         $team->team_lead_id = $request->input('team_lead_id');
         $team->save();
 
+        if ($request->input('project_manager_id')) {
+            $team->users()->attach($request->input('project_manager_id'));
+        };
+
+        if ($request->input('team_lead_id')) {
+            $team->users()->attach($request->input('team_lead_id'));
+        };
+
         return redirect()->route('teams.index');
     }
 
@@ -67,15 +81,31 @@ class TeamController extends Controller
 
     public function update(TeamUpdateRequest $request, Team $team)
     {
+        if ($team->project_manager_id != $request->input('project_manager_id')) {
+            $team->users()->detach($team->project_manager_id);
+        }
+
+        if ($team->team_lead_id != $request->input('team_lead_id')) {
+            $team->users()->detach($team->team_lead_id);
+        }
+
         $team->name = $request->input('name');
         $team->project_manager_id = $request->input('project_manager_id');
         $team->team_lead_id = $request->input('team_lead_id');
         $team->save();
 
-        return redirect()->route('teams.index');
+        if ($request->input('project_manager_id')) {;
+            $team->users()->syncWithoutDetaching($request->input('project_manager_id'));
+        }
+
+        if ($request->input('team_lead_id')) {;
+            $team->users()->syncWithoutDetaching($request->input('team_lead_id'));
+        }
+
+        return redirect()->route('teams.show', $team->id);
     }
 
-    public function delete(Team $team)
+    public function destroy(Team $team)
     {
         $team->delete();
 

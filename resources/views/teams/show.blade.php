@@ -37,16 +37,16 @@
           </tr>
     </thead>
     <tbody>
+          @foreach ($team['users'] as $user)
           <tr>
-            @foreach ($team['users'] as $user)
               <th scope="row">{{ $user['id'] }}</th>
               <td>{{ $user['first_name'] }}</td>
               <td>{{ $user['last_name'] }}</td>
               <td>{{ $user['email'] }}</td>
               <td>{{ $user['contract_date']['standard'] }}</td>
               <td></td>
-            @endforeach
           </tr>
+          @endforeach
     </tbody>
   </table>
 </div>

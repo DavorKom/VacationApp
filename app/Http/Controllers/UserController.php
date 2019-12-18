@@ -22,6 +22,10 @@ use App\Http\Requests\UserUpdateRequest;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        //$this->middleware('admin');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -160,11 +164,13 @@ class UserController extends Controller
         $user->contract_date = Carbon::parse($request->input('contract_date'))->format('Y-m-d');
         $user->save();
 
-        $team_ids = [];
+        if ($request->input('team_id')) {
+            $team_ids = [];
 
-        array_push($team_ids, $request->input('team_id'));
+            array_push($team_ids, $request->input('team_id'));
 
-        $user->teams()->sync($team_ids);
+            $user->teams()->sync($team_ids);
+        }
 
         event(new UpdatedUser($user));
 

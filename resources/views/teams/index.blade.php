@@ -23,7 +23,13 @@
                 <td>{{ $team['name'] }}</td>
                 <td>{{ $team['project_manager']['full_name'] }}</td>
                 <td>{{ $team['team_lead']['full_name'] }}</td>
-                <td></td>
+                <td>
+                    <form action="{{ route('teams.delete', [$team['id']]) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
             </tr> 
             @endforeach
     </tbody>

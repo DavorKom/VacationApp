@@ -24,21 +24,30 @@ Route::post('password/change', 'Auth\ChangePasswordController@change')->name('pa
 
 Route::get('/', 'HomeController@index')->name('home');
 
-Route::group(['middleware' => ['isAdmin']], function () {
+Route::group(['middleware' => ['auth', 'admin']], function () {
     
     Route::get('users', 'UserController@index')->name('users.index');
     Route::post('users', 'UserController@store')->name('users.store');
     Route::get('users/create', 'UserController@create')->name('users.create');
     Route::get('users/{user}/edit', 'UserController@edit')->name('users.edit');
     Route::put('users/{user}', 'UserController@update')->name('users.update');
-    Route::delete('users/{user}', 'UserController@destroy')->name('users.destroy');
+    Route::delete('users/{user}', 'UserController@destroy')->name('users.delete');
 
 });
 
-Route::get('teams', 'TeamController@index')->name('teams.index');
-Route::get('teams/create', 'TeamController@create')->name('teams.create');
-Route::get('teams/{team}', 'TeamController@show')->name('teams.show');
-Route::post('teams', 'TeamController@store')->name('teams.store');
-Route::get('teams/{team}/edit', 'TeamController@edit')->name('teams.edit');
-Route::put('teams/{team}', 'TeamController@update')->name('teams.update');
-Route::delete('teams/{team}', 'TeamController@delete')->name('teams.delete');
+Route::group(['middleware' => ['auth', 'approver']], function () {
+
+    Route::get('teams/{team}', 'TeamController@show')->name('teams.show');
+
+});
+
+Route::group(['middleware' => ['auth', 'admin']], function () {
+
+    Route::get('teams', 'TeamController@index')->name('teams.index');
+    Route::get('teams/create', 'TeamController@create')->name('teams.create');
+    Route::post('teams', 'TeamController@store')->name('teams.store');
+    Route::get('teams/{team}/edit', 'TeamController@edit')->name('teams.edit');
+    Route::put('teams/{team}', 'TeamController@update')->name('teams.update');
+    Route::delete('teams/{team}', 'TeamController@destroy')->name('teams.delete');
+
+});

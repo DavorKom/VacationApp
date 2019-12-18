@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Models\Role;
 
-class isApprover
+class Admin
 {
     /**
      * Handle an incoming request.
@@ -16,12 +16,12 @@ class isApprover
      */
     public function handle($request, Closure $next)
     {
-        $user_role = Role::find(auth()->user()->role_id);
+        $user = auth()->user();
 
-        if (!($user_role->slug === Role::APPROVER)) {
-            return redirect()->route('home');
-        };
+        if ($user->role->slug === Role::ADMIN) {
+            return $next($request);
+        }
 
-        return $next($request);
+        return redirect()->route('home');
     }
 }

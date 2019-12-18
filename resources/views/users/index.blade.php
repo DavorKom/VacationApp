@@ -61,7 +61,13 @@
             <td>{{ $user['last_name'] }}</td>
             <td>{{ $user['email'] }}</td>
             <td>{{ $user['contract_date']['standard'] }}</td>
-            <td></td>
+            <td>
+                <form action="{{ route('users.delete', [$user['id']]) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </td>
         </tr> 
         @endforeach
   </tbody>

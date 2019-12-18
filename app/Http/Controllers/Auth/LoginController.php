@@ -40,13 +40,13 @@ class LoginController extends Controller
 
     public function redirectTo() {
         
-        $user_role = Role::find(auth()->user()->role_id);
+        $user = auth()->user();
 
-        if ($user_role->slug === Role::ADMIN) {
+        if ($user->role->slug === Role::ADMIN) {
             return '/users';
         }
 
-        if ($user_role->slug === Role::APPROVER) {
+        if ($user->role->slug === Role::APPROVER) {
             return '/';
         }
 
