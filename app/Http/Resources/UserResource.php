@@ -16,7 +16,7 @@ class UserResource extends Transformer
      * @return array
      */
     public function toArray($request)
-    {   
+    {
         return [
             'id' => $this->id,
             'role' => (new RoleResource($this->role))->all($request),
@@ -25,7 +25,7 @@ class UserResource extends Transformer
             'full_name' => $this->full_name,
             'email' => $this->email,
             'contract_date' => (new DateTimeResource($this->contract_date))->all($request),
-            'teams' => BasicTeamResource::collection($this->whenLoaded('teams'))->toArray($request)
+            'team' => (new BasicTeamResource($this->whenLoaded('team')))->all($request)
         ];
     }
 }

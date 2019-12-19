@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Role;
 use App\Models\Team;
+use App\Models\VacationRequests;
 
 class User extends Authenticatable
 {
@@ -39,7 +40,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getFullNameAttribute() 
+    public function getFullNameAttribute()
     {
         return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
     }
@@ -49,9 +50,9 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function teams()
+    public function team()
     {
-        return $this->belongsToMany(Team::class)->withTimestamps();
+        return $this->belongsTo(Team::class);
     }
 
     public function teamProjectManager()
@@ -64,8 +65,13 @@ class User extends Authenticatable
         return $this->hasOne(Team::class, 'team_lead_id');
     }
 
+    public function vacationRequests()
+    {
+        return $this->hasMany(VacationRequest::class);
+    }
+
     public function scopeSearch($query, $search)
-    {   
+    {
         if ($search == null) {
             return $query;
         }

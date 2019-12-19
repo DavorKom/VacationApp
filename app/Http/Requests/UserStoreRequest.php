@@ -25,6 +25,7 @@ class UserStoreRequest extends FormRequest
     {
         return [
             'role_id' => 'required|integer',
+            'team_id' => 'nullable|integer',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users|max:255',

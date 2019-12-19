@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-  
+  <h2>Tim</h2>
   <table class="table">
     <thead>
           <tr>
@@ -24,7 +24,11 @@
     </tbody>
   </table>
 </div>
+<div class="container mb-3">
+    <a class="btn btn-primary" href="{{ route('vacations.requests.team', [$team['id']]) }}" >Zahtjevi za GO</a>
+</div>
 <div class="container">
+  <h2>Članovi tima</h2>
   <table class="table">
     <thead>
           <tr>

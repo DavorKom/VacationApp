@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserUpdateRequest extends FormRequest
+class VacationApproverRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +24,7 @@ class UserUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'role_id' => 'required|integer',
-            'team_id' => 'nullable|integer',
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'contract_date' => 'required|date',
-            'team_id' => 'exists:teams,id|nullable'
+            'approver_note' => 'string|nullable'
         ];
     }
 }

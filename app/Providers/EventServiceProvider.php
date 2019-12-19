@@ -23,6 +23,7 @@ class EventServiceProvider extends ServiceProvider
 
         'App\Events\CreatedUser' => [
             'App\Listeners\SendMailUserCreated',
+            'App\Listeners\CreateVacationData',
         ],
 
         'App\Events\UpdatingUser' => [],

@@ -4,12 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\VacationRequest;
 
 class Team extends Model
 {
     public function users()
     {
-        return $this->belongsToMany(User::class)->withTimestamps();
+        return $this->hasMany(User::class);
+    }
+
+    public function vacationRequests()
+    {
+        return $this->hasMany(VacationRequest::class);
     }
 
     public function projectManager()

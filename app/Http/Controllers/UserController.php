@@ -22,17 +22,13 @@ use App\Http\Requests\UserUpdateRequest;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        //$this->middleware('admin');
-    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {   
+    {
         $search = null;
         $order_by = 'id';
         $sort_by = 'asc';
@@ -41,7 +37,7 @@ class UserController extends Controller
 
         if ($request->input('search')) {
             $search = $request->query('search');
-        } 
+        }
 
         if ($request->input('order_by')) {
             $order_by = $request->query('order_by');
@@ -66,7 +62,7 @@ class UserController extends Controller
         ];
 
         $users = User::search($search)->orderBy($order_by, $sort_by)->whereDate('contract_date', '>=', $from)
-            ->whereDate('contract_date', '<=', $to)->with('teams')->get();
+            ->whereDate('contract_date', '<=', $to)->with('team')->get();
         $users = UserResource::collection($users)->all(request());
 
         return view('users.index')->with([
@@ -81,11 +77,11 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {   
-        $roles = Role::where('slug', '!=', Role::ADMIN)->get();
+    {
+        $roles = Role::all();
         $roles = RoleResource::collection($roles)->all(request());
 
-        $teams = Team::with('projectManager', 'teamLead', 'projectManager.teams', 'teamLead.teams', 'users', 'users.teams')->get();
+        $teams = Team::with('projectManager.team', 'teamLead.team', 'users.team')->get();
         $teams = TeamResource::collection($teams)->all(request());
 
         return view('users.create')->with([
@@ -101,11 +97,12 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(UserStoreRequest $request)
-    {   
+    {
         event(new CreatingUser());
-        
+
         $user = new User;
         $user->role_id = $request->input('role_id');
+        $user->team_id = $request->input('team_id');
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
         $user->email = $request->input('email');
@@ -113,14 +110,9 @@ class UserController extends Controller
         $user->contract_date = Carbon::parse($request->input('contract_date'))->format('Y-m-d');
         $user->save();
 
-        if ($request->team_id) {
-            $user->teams()->attach($request->input('team_id'));
-        };
-
         event(new CreatedUser($user));
 
         return redirect()->route('users.index');
-
     }
 
     /**
@@ -131,13 +123,13 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $user = User::with('role', 'teams')->find($user->id);
+        $user = User::with('role', 'team')->find($user->id);
         $user = (new UserResource($user))->all(request());
 
-        $roles = Role::where('slug', '!=', Role::ADMIN)->get();
+        $roles = Role::all();
         $roles = RoleResource::collection($roles)->all(request());
 
-        $teams = Team::with('projectManager', 'teamLead', 'projectManager.teams', 'teamLead.teams', 'users', 'users.teams')->get();
+        $teams = Team::with('projectManager.team', 'teamLead.team', 'users.team')->get();
         $teams = TeamResource::collection($teams)->all(request());
 
         return view('users.edit')->with([
@@ -155,22 +147,15 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(UserUpdateRequest $request, User $user)
-    {   
+    {
         event(new UpdatingUser($user));
-        
+
         $user->role_id = $request->input('role_id');
+        $user->team_id = $request->input('team_id');
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
         $user->contract_date = Carbon::parse($request->input('contract_date'))->format('Y-m-d');
         $user->save();
-
-        if ($request->input('team_id')) {
-            $team_ids = [];
-
-            array_push($team_ids, $request->input('team_id'));
-
-            $user->teams()->sync($team_ids);
-        }
 
         event(new UpdatedUser($user));
 
