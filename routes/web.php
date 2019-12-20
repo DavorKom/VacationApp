@@ -59,13 +59,14 @@ Route::post('vacation-requests', 'VacationRequestsController@store')->name('vaca
 Route::get('vacation-requests/{vacation_request}', 'VacationRequestsController@show')->name('vacations.requests.show');
 Route::get('vacation-requests/{vacation_request}/edit', 'VacationRequestsController@edit')->name('vacations.requests.edit');
 Route::put('vacation-requests/{vacation_request}', 'VacationRequestsController@update')->name('vacations.requests.update');
-Route::post('vacation-requests/{vacation_request}/approve', 'VacationRequestsController@approve')->name('vacations.requests.approve');
-Route::post('vacation-requests/{vacation_request}/deny', 'VacationRequestsController@deny')->name('vacations.requests.deny');
+Route::post('vacation-requests/{vacation_request}/approver', 'VacationRequestsController@approve')->name('vacations.requests.approve');
 Route::delete('vacation-requests/{vacation_request}', 'VacationRequestsController@destroy')->name('vacations.requests.delete');
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
 
-    Route::get('vacation-data/{vacation_data}/edit', 'VacationRequestsController@edit')->name('vacations.data.edit');
-    Route::put('vacation-data/{vacation_data}', 'VacationRequestsController@update')->name('vacations.data.update');
+    Route::get('vacation-data/{vacation_data}/edit', 'VacationDataController@edit')->name('vacations.data.edit');
+    Route::put('vacation-data/{vacation_data}', 'VacationDataController@update')->name('vacations.data.update');
 
 });
+
+Route::get('test', 'VacationDataController@test')->name('vacations.data.test');

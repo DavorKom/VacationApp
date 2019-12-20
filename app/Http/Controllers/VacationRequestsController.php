@@ -113,9 +113,16 @@ class VacationRequestsController extends Controller
 
         $approver_slug = Role::APPROVER;
 
+        $status = [
+            'approved' => VacationRequest::APPROVED,
+            'pending' => VacationRequest::PENDING,
+            'denied' => VacationRequest::DENIED
+        ];
+
         return view('vacations.requests.show')->with([
             'user' => $user,
             'vacation_request' => $vacation_request,
+            'status' => $status,
             'approver_slug' => $approver_slug
         ]);
     }
@@ -128,6 +135,10 @@ class VacationRequestsController extends Controller
      */
     public function edit(VacationRequest $vacation_request)
     {
+        if ($vacation_request->project_manager_status != VacationRequest::PENDING || $vacation_request->lead_team_status != VacationRequest::PENDING) {
+            return back();
+        }
+
         $vacation_request = VacationRequest::with('user.team', 'team.users', 'user.role')->find($vacation_request->id);
         $vacation_request = (new VacationRequestResource($vacation_request))->all(request());
 
@@ -168,37 +179,54 @@ class VacationRequestsController extends Controller
 
     public function approve(VacationApproverRequest $request, VacationRequest $vacation_request)
     {
-        if ($vacation_request->team_lead_id == auth()->user()->id) {
-            $vacation_request->team_lead_status = VacationRequest::APPROVED;
-            $vacation_request->team_lead_note = $request->input('approver_note');
-        };
+        $team_lead_id = data_get($vacation_request->team, 'team_lead_id');
+        $project_manager_id = data_get($vacation_request->team, 'project_manager_id');
+        $status = data_get($vacation_request, 'status');
+        $team_lead_status = data_get($vacation_request, 'team_lead_status');
+        $project_manager_status = data_get($vacation_request, 'project_manager_status');
+        $project_manager_note = data_get($vacation_request, 'project_manager_note');
+        $team_lead_note = data_get($vacation_request, 'team_lead_note');
 
-        if ($vacation_request->project_manager_id == auth()->user()->id) {
-            $vacation_request->project_manager_status = VacationRequest::APPROVED;
-            $vacation_request->project_manager_note = $request->input('approver_note');
-        };
+        if ($request->input('accepted')) {
 
-        if ($vacation_request->project_manager_status == VacationRequest::APPROVED && $vacation_request->team_lead_status == VacationRequest::APPROVED) {
-            $vacation_request->status = VacationRequest::APPROVED;
+            if ($team_lead_id == auth()->id()) {
+                $team_lead_status = VacationRequest::APPROVED;
+                $team_lead_note = $request->input('approver_note');
+            };
+
+            if ($project_manager_id == auth()->id()) {
+                $project_manager_status = VacationRequest::APPROVED;
+                $project_manager_note = $request->input('approver_note');
+            };
+
+            if ($project_manager_status == VacationRequest::APPROVED && $team_lead_status == VacationRequest::APPROVED) {
+                $status = VacationRequest::APPROVED;
+            }
         }
 
-        return redirect()->route('vacations.requests.show', $vacation_request->id);
-    }
+        if (!$request->input('accepted')) {
 
-    public function deny(VacationApproverRequest $request, VacationRequest $vacation_request)
-    {
-        if ($vacation_request->team_lead_id == auth()->user()->id) {
-            $vacation_request->team_lead_status = VacationRequest::DENIED;
-            $vacation_request->team_lead_note = $request->input('approver_note');
-        };
+            if ($team_lead_id == auth()->id()) {
+                $team_lead_status = VacationRequest::DENIED;
+                $team_lead_note = $request->input('approver_note');
+            };
 
-        if ($vacation_request->project_manager_id == auth()->user()->id) {
-            $vacation_request->project_manager_status = VacationRequest::DENIED;
-            $vacation_request->project_manager_note = $request->input('approver_note');
-        };
+            if ($project_manager_id == auth()->id()) {
+                $project_manager_status = VacationRequest::DENIED;
+                $project_manager_note = $request->input('approver_note');
+            };
 
-        if ($vacation_request->project_manager_status == VacationRequest::DENIED || $vacation_request->team_lead_status == VacationRequest::DENIED) {
-            $vacation_request->status = VacationRequest::DENIED;
+            if ($project_manager_status == VacationRequest::DENIED || $team_lead_status == VacationRequest::DENIED) {
+                $status = VacationRequest::DENIED;
+            }
+        }
+
+        if (
+            $status == VacationRequest::DENIED &&
+            $project_manager_status != VacationRequest::DENIED &&
+            $team_lead_status != VacationRequest::DENIED
+        ) {
+            $status = VacationRequest::PENDING;
         }
 
         $vacation_request->save();

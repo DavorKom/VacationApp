@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Carbon;
 use App\Models\VacationData;
 
 class CreateVacationData
@@ -28,7 +29,20 @@ class CreateVacationData
      */
     public function handle($event)
     {
+        $contract_date = Carbon::createFromDate($this->user->contract_date);
+        $now = Carbon::now();
+        $months_worked = $now->diffInMonths($contract_date);
+
+        $unused_vacation = 20;
+        if ($months_worked < 6) {
+            $unused_vacation = round(20 / 12 * $months_worked, 0, PHP_ROUND_HALF_EVEN);
+        }
+
         $vacation_data = new VacationData;
         $vacation_data->user_id = $this->user->id;
+        $vacation_data->unused_vacation = $unused_vacation;
+        $vacation_data->used_vacation = 0;
+        $vacation_data->paid_leave = 0;
+        $vacation_data->save();
     }
 }

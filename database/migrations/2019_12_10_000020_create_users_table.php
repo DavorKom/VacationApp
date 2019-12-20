@@ -32,7 +32,9 @@ class CreateUsersTable extends Migration
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('set null');
         });
 
-        DB::table('users')->insert([
+        DB::table('users')->firstOrCreate([
+            'email' => 'test@gmail.com'
+        ],[
             'role_id' => Role::where('slug', Role::ADMIN)->first()->id,
             'first_name' => 'Admin',
             'last_name' => 'Admin',

@@ -24,7 +24,7 @@ class UserStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'role_id' => 'required|integer',
+            'role_id' => 'required|exists:roles,id',
             'team_id' => 'nullable|integer',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',

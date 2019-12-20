@@ -24,6 +24,7 @@ class VacationApproverRequest extends FormRequest
     public function rules()
     {
         return [
+            'accepted' => 'in:1,0',
             'approver_note' => 'string|nullable'
         ];
     }
