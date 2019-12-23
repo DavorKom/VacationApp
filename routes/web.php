@@ -68,5 +68,3 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
     Route::put('vacation-data/{vacation_data}', 'VacationDataController@update')->name('vacations.data.update');
 
 });
-
-Route::get('test', 'VacationDataController@test')->name('vacations.data.test');

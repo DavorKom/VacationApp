@@ -2,6 +2,9 @@
 
 @section('content')
 <div class="container">
+    <div class="mb-4">
+        <a href="{{ url()->previous() }}" class="btn-lg btn-primary text-decoration-none">Back</a>
+    </div>
     <form action="{{ route('teams.store') }}" method="POST">
         @csrf
         <div class="form-group">

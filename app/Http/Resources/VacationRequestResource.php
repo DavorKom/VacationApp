@@ -29,6 +29,7 @@ class VacationRequestResource extends Transformer
             'project_manager_status' => $this->project_manager_status,
             'team_lead_note' => data_get($this, 'team_lead_note'),
             'team_lead_status' => $this->team_lead_status,
+            'admin_note' => $this->admin_note,
             'status' => $this->status
         ];
     }

@@ -2,6 +2,9 @@
 
 @section('content')
 <div class="container">
+  <div class="mb-2">
+      <a href="{{ url()->previous() }}" class="btn-lg btn-primary text-decoration-none">Back</a>
+  </div>
   <h2>Tim</h2>
   <table class="table">
     <thead>

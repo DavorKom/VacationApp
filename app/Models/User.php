@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->hasMany(VacationRequest::class);
     }
 
+    public function vacationData()
+    {
+        return $this->hasOne(VacationData::class);
+    }
+
     public function scopeSearch($query, $search)
     {
         if ($search == null) {

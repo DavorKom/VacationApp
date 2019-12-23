@@ -9,16 +9,14 @@ use App\Models\VacationData;
 
 class CreateVacationData
 {
-    protected $user;
-
     /**
      * Create the event listener.
      *
      * @return void
      */
-    public function __construct($user)
+    public function __construct()
     {
-        $this->user = $user;
+        //
     }
 
     /**
@@ -29,7 +27,7 @@ class CreateVacationData
      */
     public function handle($event)
     {
-        $contract_date = Carbon::createFromDate($this->user->contract_date);
+        $contract_date = Carbon::createFromDate($event->user->contract_date);
         $now = Carbon::now();
         $months_worked = $now->diffInMonths($contract_date);
 
@@ -39,7 +37,7 @@ class CreateVacationData
         }
 
         $vacation_data = new VacationData;
-        $vacation_data->user_id = $this->user->id;
+        $vacation_data->user_id = $event->user->id;
         $vacation_data->unused_vacation = $unused_vacation;
         $vacation_data->used_vacation = 0;
         $vacation_data->paid_leave = 0;

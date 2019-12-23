@@ -11,6 +11,7 @@ class VacationRequest extends Model
     const PENDING = 'pending';
     const DENIED = 'denied';
     const APPROVED = 'approved';
+    const ADMIN = 'pending_for_admin_approval';
 
     public function user()
     {

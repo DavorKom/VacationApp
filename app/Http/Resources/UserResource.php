@@ -25,7 +25,8 @@ class UserResource extends Transformer
             'full_name' => $this->full_name,
             'email' => $this->email,
             'contract_date' => (new DateTimeResource($this->contract_date))->all($request),
-            'team' => (new BasicTeamResource($this->whenLoaded('team')))->all($request)
+            'team' => (new BasicTeamResource($this->whenLoaded('team')))->all($request),
+            'vacation_data' => (new BasicVacationData($this->whenLoaded('vacationData')))->all($request)
         ];
     }
 }

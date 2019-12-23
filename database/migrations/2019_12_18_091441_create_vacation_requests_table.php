@@ -25,6 +25,7 @@ class CreateVacationRequestsTable extends Migration
             $table->string('project_manager_status');
             $table->text('team_lead_note')->nullable();
             $table->string('team_lead_status');
+            $table->text('admin_note')->nullable();
             $table->string('status');
             $table->timestamps();
 

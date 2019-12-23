@@ -5,31 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Models\User;
-
-
+use App\Models\VacationData;
+use App\Http\Resources\VacationDataResource;
+use App\Http\Requests\VacationDataUpdateRequest;
 
 class VacationDataController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(VacationData $vacation_data)
     {
-        //
+        $vacation_data = VacationData::with('user.role', 'user.team')->find($vacation_data->id);
+        $vacation_data = (new VacationDataResource($vacation_data))->all(request());
+
+        return view('vacations.data.edit')->with([
+            'vacation_data' => $vacation_data
+        ]);
     }
 
     /**
@@ -39,24 +34,13 @@ class VacationDataController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, VacationData $vacation_data)
     {
-        //
-    }
+        $vacation_data->unused_vacation = $request->input('unused_vacation');
+        $vacation_data->used_vacation = $request->input('used_vacation');
+        $vacation_data->paid_leave = $request->input('paid_leave');
+        $vacation_data->save();
 
-    public function test()
-    {
-        $user = User::find(1);
-
-        $contract_date = Carbon::createFromDate($user->contract_date);
-        $now = Carbon::now();
-        $months_worked = $now->diffInMonths($contract_date);
-
-        $unused_vacation = 20;
-        if ($months_worked < 6) {
-            $unused_vacation = round(20 / 12 * $months_worked, 0, PHP_ROUND_HALF_EVEN);
-        }
-
-        dd($unused_vacation);
+        return redirect()->route('vacations.requests.user', $vacation_data->user_id);
     }
 }

@@ -24,7 +24,7 @@ class VacationRequestsController extends Controller
      */
     public function user(User $user)
     {
-        $user = User::with('team')->find($user->id);
+        $user = User::with('team', 'vacationData')->find($user->id);
         $user = (new UserResource($user))->all(request());
 
         $vacation_requests = VacationRequest::where('user_id', $user['id'])->get();
@@ -62,7 +62,12 @@ class VacationRequestsController extends Controller
      */
     public function create()
     {
-        return view('vacations.requests.create');
+        $user = User::with('team', 'vacationData')->find(auth()->id());
+        $user = (new UserResource($user))->all(request());
+
+        return view('vacations.requests.create')->with([
+            'user' => $user
+        ]);
     }
 
     /**
@@ -74,25 +79,33 @@ class VacationRequestsController extends Controller
     public function store(VacationRequestStoreRequest $request)
     {
         $user = auth()->user();
+        $team_lead_id = data_get($user->team, 'team_lead_id');
+        $project_manager_id = data_get($user->team, 'project_manager_id');
 
         $vacation_request = new VacationRequest;
         $vacation_request->user_id = $user->id;
-        $vacation_request->team_id = $user->team->id;
+        $vacation_request->team_id = data_get($user->team, 'id');
         $vacation_request->from = Carbon::parse($request->input('from'))->format('Y-m-d');
         $vacation_request->to = Carbon::parse($request->input('to'))->format('Y-m-d');
         $vacation_request->note = $request->input('note');
 
         $vacation_request->project_manager_status = VacationRequest::PENDING;
-        if ($user->team->project_manager_id == $user->id || $user->team->project_manager_id == null) {
+        if ($project_manager_id == $user->id || $project_manager_id == null) {
             $vacation_request->project_manager_status = VacationRequest::APPROVED;
         }
 
         $vacation_request->team_lead_status = VacationRequest::PENDING;
-        if ($user->team->team_lead_id == $user->id || $user->team->team_lead == null) {
+        if ($team_lead_id == $user->id || $team_lead_id == null) {
             $vacation_request->team_lead_status = VacationRequest::APPROVED;
         }
 
         $vacation_request->status = VacationRequest::PENDING;
+        if(($project_manager_id == null || $project_manager_id == $user->id) && ($team_lead_id == null || $team_lead_id == $user->id)) {
+            $vacation_request->team_lead_status = VacationRequest::ADMIN;
+            $vacation_request->project_manager_status = VacationRequest::ADMIN;
+            $vacation_request->status = VacationRequest::ADMIN;
+        }
+
         $vacation_request->save();
 
         return redirect()->route('vacations.requests.user', $vacation_request->user_id);
@@ -106,12 +119,15 @@ class VacationRequestsController extends Controller
      */
     public function show(VacationRequest $vacation_request)
     {
-        $user = User::with('team')->find($vacation_request->user_id);
+        $user = User::with('team', 'vacationData')->find($vacation_request->user_id);
         $user = (new UserResource($user))->all(request());
 
         $vacation_request = (new VacationRequestResource($vacation_request))->all(request());
 
-        $approver_slug = Role::APPROVER;
+        $role_slugs = [
+            'approver' => Role::APPROVER,
+            'admin' => Role::ADMIN,
+        ];
 
         $status = [
             'approved' => VacationRequest::APPROVED,
@@ -123,7 +139,7 @@ class VacationRequestsController extends Controller
             'user' => $user,
             'vacation_request' => $vacation_request,
             'status' => $status,
-            'approver_slug' => $approver_slug
+            'role_slugs' => $role_slugs
         ]);
     }
 
@@ -135,15 +151,22 @@ class VacationRequestsController extends Controller
      */
     public function edit(VacationRequest $vacation_request)
     {
-        if ($vacation_request->project_manager_status != VacationRequest::PENDING || $vacation_request->lead_team_status != VacationRequest::PENDING) {
+        if ($vacation_request->project_manager_status == VacationRequest::APPROVED ||
+            $vacation_request->lead_team_status == VacationRequest::APPROVED ||
+            $vacation_request->lead_team_status == VacationRequest::DENIED ||
+            $vacation_request->lead_team_status == VacationRequest::DENIED
+        ) {
             return back();
-        }
+        };
 
-        $vacation_request = VacationRequest::with('user.team', 'team.users', 'user.role')->find($vacation_request->id);
+        $vacation_request = VacationRequest::with('user.team', 'user.vacationData', 'team.users', 'user.role')->find($vacation_request->id);
         $vacation_request = (new VacationRequestResource($vacation_request))->all(request());
 
+        $user = $vacation_request['user'];
+
         return view('vacations.requests.edit')->with([
-            'vacation_request' => $vacation_request
+            'vacation_request' => $vacation_request,
+            'user' => $user
         ]);
     }
 
@@ -177,8 +200,15 @@ class VacationRequestsController extends Controller
         return redirect()->route('vacations.requests.user');
     }
 
+    /**
+     * Approve or deny vacation request
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function approve(VacationApproverRequest $request, VacationRequest $vacation_request)
     {
+        $user = auth()->user();
         $team_lead_id = data_get($vacation_request->team, 'team_lead_id');
         $project_manager_id = data_get($vacation_request->team, 'project_manager_id');
         $status = data_get($vacation_request, 'status');
@@ -186,6 +216,8 @@ class VacationRequestsController extends Controller
         $project_manager_status = data_get($vacation_request, 'project_manager_status');
         $project_manager_note = data_get($vacation_request, 'project_manager_note');
         $team_lead_note = data_get($vacation_request, 'team_lead_note');
+        $unused_vacation = data_get($vacation_request->user->vacationData, 'unused_vacation');
+        $paid_leave = data_get($vacation_request->user->vacationData, 'paid_leave');
 
         if ($request->input('accepted')) {
 
@@ -201,6 +233,18 @@ class VacationRequestsController extends Controller
 
             if ($project_manager_status == VacationRequest::APPROVED && $team_lead_status == VacationRequest::APPROVED) {
                 $status = VacationRequest::APPROVED;
+            }
+
+            if ($user->role->slug == Role::ADMIN) {
+                $team_lead_status = VacationRequest::APPROVED;
+                $project_manager_status = VacationRequest::APPROVED;
+                $status = VacationRequest::APPROVED;
+                $vacation_request->admin_note = $request->input('approver_note');
+            }
+
+            // ovdje oduzeti od unused vacation
+            if($request->input('paid_leave')) {
+                //logika za oduzimanje dana od paid leveava
             }
         }
 
@@ -219,6 +263,13 @@ class VacationRequestsController extends Controller
             if ($project_manager_status == VacationRequest::DENIED || $team_lead_status == VacationRequest::DENIED) {
                 $status = VacationRequest::DENIED;
             }
+
+            if ($user->role->slug == Role::ADMIN) {
+                $team_lead_status = VacationRequest::DENIED;
+                $project_manager_status = VacationRequest::DENIED;
+                $status = VacationRequest::DENIED;
+                $vacation_request->admin_note = $request->input('approver_note');
+            }
         }
 
         if (
@@ -229,6 +280,10 @@ class VacationRequestsController extends Controller
             $status = VacationRequest::PENDING;
         }
 
+        //updateati unused vacation i paid leave ovdje kad bude logika gotova
+        $vacation_request->team_lead_status = $team_lead_status;
+        $vacation_request->project_manager_status = $project_manager_status;
+        $vacation_request->status = $status;
         $vacation_request->save();
 
         return redirect()->route('vacations.requests.show', $vacation_request->id);

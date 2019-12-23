@@ -4,6 +4,7 @@
 <div class="container mb-3">
     <a class="btn btn-primary" href="{{ route('users.create') }}">Novi korisnik</a>
     <a class="btn btn-primary" href="{{ route('teams.create') }}">Novi tim</a>
+    <a class="btn btn-primary float-right" href="{{ route('teams.index') }}">Timovi</a>
 </div>
 <div class="container mb-1">
     <form action="{{ route("users.index") }}" method="get">
@@ -51,6 +52,7 @@
             <th scope="col">E-mail</th>
             <th scope="col">Početka rada</th>
             <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
   </thead>
   <tbody>
@@ -62,13 +64,16 @@
             <td>{{ $user['email'] }}</td>
             <td>{{ $user['contract_date']['standard'] }}</td>
             <td>
+                <a class="btn btn-primary" href="{{ route('vacations.requests.user', [$user['id']]) }}">Show</a>
+            </td>
+            <td>
                 <form action="{{ route('users.delete', [$user['id']]) }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </td>
-        </tr> 
+        </tr>
         @endforeach
   </tbody>
 </table>
