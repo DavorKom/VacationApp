@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="mb-2">
-        <a href="{{ url()->previous() }}" class="btn-lg btn-primary text-decoration-none">Back</a>
+        <a href="{{ route('vacations.requests.user', [$user['id']]) }}" class="btn-lg btn-primary text-decoration-none">User vacation requests</a>
     </div>
     <table class="table">
         <thead>
@@ -13,7 +13,6 @@
                     <th scope="col">Prezime</th>
                     <th scope="col">Contract Date</th>
                     <th scope="col">Unused Vacation</th>
-                    <th scope="col">Used Vacation</th>
                     <th scope="col">Paid Leave</th>
                 </tr>
         </thead>
@@ -24,7 +23,6 @@
                     <td>{{ $user['last_name'] }}</td>
                     <td>{{ $user['contract_date']['standard'] }}</td>
                     <td>{{ $user['vacation_data']['unused_vacation'] }}</td>
-                    <td>{{ $user['vacation_data']['used_vacation'] }}</td>
                     <td>{{ $user['vacation_data']['paid_leave'] }}</td>
                 </tr>
         </tbody>
@@ -93,7 +91,7 @@
         <p>{{ $vacation_request['admin_note'] }}</p>
     </div>
     @endif
-    @if ((auth()->user()->role->slug == $role_slugs['admin']) || (auth()->user()->role->slug == $role_slugs['approver'] && $vacation_request['status'] != $status['approved']))
+    @if (((auth()->user()->role->slug == $role_slugs['admin']) || auth()->user()->role->slug == $role_slugs['approver']) && $vacation_request['status'] != $status['approved'])
     <div class="form-group">
         <form action="{{ route('vacations.requests.approve', [$vacation_request['id']]) }}" method="POST">
             @csrf

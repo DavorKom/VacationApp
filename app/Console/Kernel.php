@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\UpdateVacationData::class,
+        Commands\VacationDataYearly::class
     ];
 
     /**
@@ -24,8 +25,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('vacation-data:update')
+                 ->dailyAt('13:00');
+
+        $schedule->command('vacation-data:yearly')
+                ->yearly();
     }
 
     /**

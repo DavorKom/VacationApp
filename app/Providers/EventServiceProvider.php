@@ -29,6 +29,16 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\UpdatingUser' => [],
 
         'App\Events\UpdatedUser' => [],
+
+        'App\Events\CreatedVacationRequest' => [
+            'App\Listeners\SendMailVacationRequestCreated',
+        ],
+
+        'App\Events\UpdatedVacationRequest' => [],
+
+        'App\Events\ApproveVacationRequest' => [
+            'App\Listeners\SendMailVacationRequestApprove',
+        ],
     ];
 
     /**

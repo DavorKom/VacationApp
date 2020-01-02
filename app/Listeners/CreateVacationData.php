@@ -39,7 +39,6 @@ class CreateVacationData
         $vacation_data = new VacationData;
         $vacation_data->user_id = $event->user->id;
         $vacation_data->unused_vacation = $unused_vacation;
-        $vacation_data->used_vacation = 0;
         $vacation_data->paid_leave = 0;
         $vacation_data->save();
     }

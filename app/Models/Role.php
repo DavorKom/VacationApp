@@ -11,7 +11,7 @@ class Role extends Model
     const APPROVER = 'project-manager-team-lead';
     const EMPLOYEE = 'employee';
 
-    public function role()
+    public function users()
     {
         return $this->hasMany(User::class);
     }

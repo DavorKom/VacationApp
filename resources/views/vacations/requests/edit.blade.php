@@ -10,7 +10,6 @@
                     <th scope="col">Prezime</th>
                     <th scope="col">Contract Date</th>
                     <th scope="col">Unused Vacation</th>
-                    <th scope="col">Used Vacation</th>
                     <th scope="col">Paid Leave</th>
                 </tr>
         </thead>
@@ -21,7 +20,6 @@
                     <td>{{ $vacation_request['last_name'] }}</td>
                     <td>{{ $vacation_request['contract_date']['standard'] }}</td>
                     <td>{{ $vacation_request['vacation_data']['unused_vacation'] }}</td>
-                    <td>{{ $vacation_request['vacation_data']['used_vacation'] }}</td>
                     <td>{{ $vacation_request['vacation_data']['paid_leave'] }}</td>
                 </tr>
         </tbody>

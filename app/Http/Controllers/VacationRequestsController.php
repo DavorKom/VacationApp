@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CreatedVacationRequest;
+use App\Events\UpdatedVacationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\VacationRequestStoreRequest;
 use App\Http\Requests\VacationApproverRequest;
 use App\Http\Requests\VacationRequestUpdateRequest;
@@ -14,6 +17,9 @@ use App\Models\User;
 use App\Models\Team;
 use App\Models\Role;
 use App\Models\VacationRequest;
+use App\Models\VacationData;
+use App\Models\Holiday;
+use App\Events\ApproveVacationRequest;
 
 class VacationRequestsController extends Controller
 {
@@ -78,7 +84,7 @@ class VacationRequestsController extends Controller
      */
     public function store(VacationRequestStoreRequest $request)
     {
-        $user = auth()->user();
+        $user = User::with('team', 'team.projectManager', 'team.teamLead')->find(auth()->id());
         $team_lead_id = data_get($user->team, 'team_lead_id');
         $project_manager_id = data_get($user->team, 'project_manager_id');
 
@@ -107,6 +113,8 @@ class VacationRequestsController extends Controller
         }
 
         $vacation_request->save();
+
+        event(new CreatedVacationRequest($vacation_request, $user));
 
         return redirect()->route('vacations.requests.user', $vacation_request->user_id);
     }
@@ -184,6 +192,8 @@ class VacationRequestsController extends Controller
         $vacation_request->note = $request->input('note');
         $vacation_request->save();
 
+        event(new UpdatedVacationRequest($vacation_request));
+
         return redirect()->route('vacations.requests.user', $vacation_request->user_id);
     }
 
@@ -208,6 +218,9 @@ class VacationRequestsController extends Controller
      */
     public function approve(VacationApproverRequest $request, VacationRequest $vacation_request)
     {
+        $vacation_request = VacationRequest::with('user', 'team')->find($vacation_request->id);
+        $vacation_data = VacationData::where('user_id', $vacation_request->user_id)->first();
+
         $user = auth()->user();
         $team_lead_id = data_get($vacation_request->team, 'team_lead_id');
         $project_manager_id = data_get($vacation_request->team, 'project_manager_id');
@@ -216,17 +229,17 @@ class VacationRequestsController extends Controller
         $project_manager_status = data_get($vacation_request, 'project_manager_status');
         $project_manager_note = data_get($vacation_request, 'project_manager_note');
         $team_lead_note = data_get($vacation_request, 'team_lead_note');
-        $unused_vacation = data_get($vacation_request->user->vacationData, 'unused_vacation');
-        $paid_leave = data_get($vacation_request->user->vacationData, 'paid_leave');
+
+        DB::beginTransaction();
 
         if ($request->input('accepted')) {
 
-            if ($team_lead_id == auth()->id()) {
+            if ($team_lead_id == $user->id) {
                 $team_lead_status = VacationRequest::APPROVED;
                 $team_lead_note = $request->input('approver_note');
             };
 
-            if ($project_manager_id == auth()->id()) {
+            if ($project_manager_id == $user->id) {
                 $project_manager_status = VacationRequest::APPROVED;
                 $project_manager_note = $request->input('approver_note');
             };
@@ -235,17 +248,39 @@ class VacationRequestsController extends Controller
                 $status = VacationRequest::APPROVED;
             }
 
-            if ($user->role->slug == Role::ADMIN) {
+            if ($user->role->slug == Role::ADMIN && $user->id != $project_manager_id && $user->id != $team_lead_id) {
                 $team_lead_status = VacationRequest::APPROVED;
                 $project_manager_status = VacationRequest::APPROVED;
                 $status = VacationRequest::APPROVED;
                 $vacation_request->admin_note = $request->input('approver_note');
             }
 
-            // ovdje oduzeti od unused vacation
-            if($request->input('paid_leave')) {
-                //logika za oduzimanje dana od paid leveava
-            }
+            if($status == VacationRequest::APPROVED) {
+                $holidays = Holiday::where('date', '>=', $vacation_request->from)->where('date', '<=', $vacation_request->to)->get();
+
+                $from = Carbon::parse($vacation_request->from);
+                $to = Carbon::parse($vacation_request->to)->addDays(1);
+                $vacation_lenght = $to->diffInWeekdays($from);
+
+                foreach ($holidays as $holiday) {
+                    $holiday_carbon = Carbon::parse($holiday->date);
+                    if ($holiday_carbon->isWeekday()) {
+                        $vacation_lenght -= 1;
+                    };
+                };
+
+                $vacation_data->unused_vacation -= $vacation_lenght;
+                $vacation_request->used_vacation += $vacation_lenght;
+                if($request->input('paid_leave')) {
+                    $vacation_data->paid_leave += $vacation_lenght;
+                    $vacation_data->unused_vacation += $vacation_lenght;
+                    $vacation_request->used_vacation -= $vacation_lenght;
+                };
+
+                $vacation_data->save();
+
+                event(new ApproveVacationRequest($vacation_request));
+            };
         }
 
         if (!$request->input('accepted')) {
@@ -262,13 +297,15 @@ class VacationRequestsController extends Controller
 
             if ($project_manager_status == VacationRequest::DENIED || $team_lead_status == VacationRequest::DENIED) {
                 $status = VacationRequest::DENIED;
+                event(new ApproveVacationRequest($vacation_request));
             }
 
-            if ($user->role->slug == Role::ADMIN) {
+            if ($user->role->slug == Role::ADMIN && $user->id != $project_manager_id && $user->id != $team_lead_id) {
                 $team_lead_status = VacationRequest::DENIED;
                 $project_manager_status = VacationRequest::DENIED;
                 $status = VacationRequest::DENIED;
                 $vacation_request->admin_note = $request->input('approver_note');
+                event(new ApproveVacationRequest($vacation_request));
             }
         }
 
@@ -280,11 +317,14 @@ class VacationRequestsController extends Controller
             $status = VacationRequest::PENDING;
         }
 
-        //updateati unused vacation i paid leave ovdje kad bude logika gotova
-        $vacation_request->team_lead_status = $team_lead_status;
         $vacation_request->project_manager_status = $project_manager_status;
+        $vacation_request->project_manager_note = $project_manager_note;
+        $vacation_request->team_lead_status = $team_lead_status;
+        $vacation_request->team_lead_note = $team_lead_note;
         $vacation_request->status = $status;
         $vacation_request->save();
+
+        DB::commit();
 
         return redirect()->route('vacations.requests.show', $vacation_request->id);
     }
