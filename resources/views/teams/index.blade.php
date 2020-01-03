@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="container mb-3">
-    <a class="btn btn-primary" href="{{ route('users.create') }}">Novi korisnik</a>
-    <a class="btn btn-primary" href="{{ route('teams.create') }}">Novi tim</a>
-    <a class="btn btn-primary float-right" href="{{ route('users.index') }}">Korisnici</a>
+    <a class="btn btn-primary" href="{{ route('users.index') }}">Korisnici</a>
+    <a class="btn btn-primary float-right" href="{{ route('users.create') }}">Novi korisnik</a>
+    <a class="btn btn-primary float-right mr-2" href="{{ route('teams.create') }}">Novi tim</a>
 </div>
 <div class="container">
     <table class="table">

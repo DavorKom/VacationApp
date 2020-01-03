@@ -13,6 +13,7 @@
                     <th scope="col">Prezime</th>
                     <th scope="col">Contract Date</th>
                     <th scope="col">Unused Vacation</th>
+                    <th scope="col">Used Vacation</th>
                     <th scope="col">Paid Leave</th>
                 </tr>
         </thead>
@@ -23,6 +24,7 @@
                     <td>{{ $user['last_name'] }}</td>
                     <td>{{ $user['contract_date']['standard'] }}</td>
                     <td>{{ $user['vacation_data']['unused_vacation'] }}</td>
+                    <td>{{ $user['vacation_data']['used_vacation'] }}</td>
                     <td>{{ $user['vacation_data']['paid_leave'] }}</td>
                 </tr>
         </tbody>
@@ -35,7 +37,7 @@
             <span class="btn-lg btn-success float-right">Appproved</span>
         @elseif ($vacation_request['status'] === $status['denied'])
             <span class="btn-lg btn-danger float-right">Denied</span>
-         @elseif ($vacation_request['project_manager_status'] === $status['pending'])
+         @elseif ($vacation_request['status'] === $status['pending'])
             <span class="btn-lg btn-warning float-right">Pending</span>
         @else
             <span class="btn-lg btn-warning float-right">Pending for Admin approval</span>
@@ -76,7 +78,7 @@
                 <span class="btn-sm btn-success float-right">Appproved</span>
             @elseif ($vacation_request['team_lead_status'] === $status['denied'])
                 <span class="btn-sm btn-danger float-right">Denied</span>
-             @elseif ($vacation_request['project_manager_status'] === $status['pending'])
+             @elseif ($vacation_request['team_lead_status'] === $status['pending'])
                 <span class="btn-sm btn-warning float-right">Pending</span>
             @else
                 <span class="btn-sm btn-warning float-right">Pending for Admin approval</span>

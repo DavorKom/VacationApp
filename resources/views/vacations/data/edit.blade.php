@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="mb-2">
-        <a href="{{ url()->previous() }}" class="btn-lg btn-primary text-decoration-none">Back</a>
+        <a href="{{ route('vacations.requests.user', [$vacation_data['user']['id']]) }}" class="btn-lg btn-primary text-decoration-none">Back</a>
     </div>
     <form action="{{ route('vacations.data.update', [$vacation_data['id']] ) }}" method="POST">
         @csrf

@@ -44,14 +44,14 @@ class VacationDataYearly extends Command
         foreach ($vacation_datas as $vacation_data) {
             $contract_date = Carbon::createFromDate($vacation_data->user->contract_date);
             $now = Carbon::now();
-            $current_year = Carbon::createFromDate(null, 1, 1);
             $months_worked = $now->diffInMonths($contract_date);
 
-            if ($months_worked > 6 && $current_year->toDateString() == $now->toDateString()) {
+            if ($months_worked > 6) {
                 $vacation_data->unused_vacation += 20;
                 $vacation_data->paid_leave = 0;
             }
 
+            $vacation_data->used_vacation = 0;
             $vacation_data->save();
         }
     }

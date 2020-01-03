@@ -18,6 +18,7 @@ class CreateVacationDataTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->integer('unused_vacation')->default(0);
+            $table->integer('used_vacation')->default(0);
             $table->integer('paid_leave')->default(0);
             $table->timestamps();
 
@@ -28,6 +29,7 @@ class CreateVacationDataTable extends Migration
         DB::table('vacation_data')->insert([
             'user_id' => 1,
             'unused_vacation' => 0,
+            'used_vacation' => 0,
             'paid_leave' => 0,
             'created_at' => now(),
             'updated_at' => now()

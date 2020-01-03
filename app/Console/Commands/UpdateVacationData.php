@@ -46,7 +46,7 @@ class UpdateVacationData extends Command
             $now = Carbon::now();
             $months_worked = $now->diffInMonths($contract_date);
 
-            if($now->day == $contract_date->day && $months_worked < 6) {
+            if(0 < $months_worked && $months_worked < 6) {
                 $last_month_unused_vacation = round(20 / 12 * $months_worked-1, 0, PHP_ROUND_HALF_EVEN);
                 $this_month_unused_vacation = round(20 / 12 * $months_worked, 0, PHP_ROUND_HALF_EVEN);
                 $vacation_data->unused_vacation = $vacation_data->unused_vacation + ($this_month_unused_vacation - $last_month_unused_vacation);

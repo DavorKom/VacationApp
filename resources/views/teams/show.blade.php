@@ -29,6 +29,7 @@
 </div>
 <div class="container mb-3">
     <a class="btn btn-primary" href="{{ route('vacations.requests.team', [$team['id']]) }}" >Zahtjevi za GO</a>
+    <a class="btn btn-primary" href="{{ route('teams.edit', [$team['id']]) }}" >Edit team</a>
 </div>
 <div class="container">
   <h2>Članovi tima</h2>

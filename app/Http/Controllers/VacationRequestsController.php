@@ -30,6 +30,8 @@ class VacationRequestsController extends Controller
      */
     public function user(User $user)
     {
+        $this->authorize('view', $user);
+
         $user = User::with('team', 'vacationData')->find($user->id);
         $user = (new UserResource($user))->all(request());
 
@@ -49,6 +51,8 @@ class VacationRequestsController extends Controller
      */
     public function team(Team $team)
     {
+        $this->authorize('view', $team);
+
         $vacation_requests = VacationRequest::with('user.team', 'team.users', 'user.role')->where('team_id', $team->id)->get();
         $vacation_requests = VacationRequestResource::collection($vacation_requests)->all(request());
 
@@ -127,6 +131,8 @@ class VacationRequestsController extends Controller
      */
     public function show(VacationRequest $vacation_request)
     {
+        $this->authorize('view', $vacation_request);
+
         $user = User::with('team', 'vacationData')->find($vacation_request->user_id);
         $user = (new UserResource($user))->all(request());
 
@@ -159,9 +165,12 @@ class VacationRequestsController extends Controller
      */
     public function edit(VacationRequest $vacation_request)
     {
+        $this->authorize('update', $vacation_request);
+
+        // user can edit vacation request only if status is pending
         if ($vacation_request->project_manager_status == VacationRequest::APPROVED ||
             $vacation_request->lead_team_status == VacationRequest::APPROVED ||
-            $vacation_request->lead_team_status == VacationRequest::DENIED ||
+            $vacation_request->project_manager_status == VacationRequest::DENIED ||
             $vacation_request->lead_team_status == VacationRequest::DENIED
         ) {
             return back();
@@ -187,6 +196,8 @@ class VacationRequestsController extends Controller
      */
     public function update(VacationRequestUpdateRequest $request, VacationRequest $vacation_request)
     {
+        $this->authorize('update', $vacation_request);
+
         $vacation_request->from = Carbon::parse($request->input('from'))->format('Y-m-d');
         $vacation_request->to = Carbon::parse($request->input('to'))->format('Y-m-d');
         $vacation_request->note = $request->input('note');
@@ -205,6 +216,17 @@ class VacationRequestsController extends Controller
      */
     public function destroy(VacationRequest $vacation_request)
     {
+        $this->authorize('update', $vacation_request);
+
+        // user can delete vacation request only if status is pending
+        if ($vacation_request->project_manager_status == VacationRequest::APPROVED ||
+            $vacation_request->lead_team_status == VacationRequest::APPROVED ||
+            $vacation_request->project_manager_status == VacationRequest::DENIED ||
+            $vacation_request->lead_team_status == VacationRequest::DENIED
+        ) {
+            return back();
+        };
+
         $vacation_request->delete();
 
         return redirect()->route('vacations.requests.user');
@@ -273,6 +295,7 @@ class VacationRequestsController extends Controller
                 $vacation_request->used_vacation += $vacation_lenght;
                 if($request->input('paid_leave')) {
                     $vacation_data->paid_leave += $vacation_lenght;
+                    $vacation_request->paid_leave = 1;
                     $vacation_data->unused_vacation += $vacation_lenght;
                     $vacation_request->used_vacation -= $vacation_lenght;
                 };

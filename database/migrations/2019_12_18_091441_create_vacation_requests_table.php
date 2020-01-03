@@ -19,6 +19,7 @@ class CreateVacationRequestsTable extends Migration
             $table->unsignedBigInteger('team_id')->nullable();
             $table->date('from');
             $table->date('to');
+            $table->boolean('paid_leave')->default(0);
             $table->unsignedInteger('used_vacation')->default(0);
             $table->text('note')->nullable();
             $table->text('project_manager_note')->nullable();

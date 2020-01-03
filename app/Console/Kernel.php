@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('vacation-data:update')
-                 ->dailyAt('13:00');
+                 ->monthlyOn(1, '03:00');
 
         $schedule->command('vacation-data:yearly')
                 ->yearly();

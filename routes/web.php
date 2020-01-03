@@ -22,8 +22,6 @@ Route::post('password/reset', 'Auth\ResetPasswordController@reset')->name('passw
 Route::get('password/change', 'Auth\ChangePasswordController@showChangeForm')->name('password.change.form');
 Route::post('password/change', 'Auth\ChangePasswordController@change')->name('password.change');
 
-Route::get('/', 'HomeController@index')->name('home');
-
 Route::group(['middleware' => ['auth', 'admin']], function () {
 
     Route::get('users', 'UserController@index')->name('users.index');
@@ -49,18 +47,22 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 Route::group(['middleware' => ['auth', 'approver']], function () {
 
     Route::get('teams/{team}', 'TeamController@show')->name('teams.show');
+    Route::get('teams/{team}/vacation-requests', 'VacationRequestsController@team')->name('vacations.requests.team');
+    Route::post('vacation-requests/{vacation_request}/approve', 'VacationRequestsController@approve')->name('vacations.requests.approve');
 
 });
 
-Route::get('teams/{team}/vacation-requests', 'VacationRequestsController@team')->name('vacations.requests.team');
-Route::get('users/{user}/vacation-requests', 'VacationRequestsController@user')->name('vacations.requests.user');
-Route::get('vacation-requests/create', 'VacationRequestsController@create')->name('vacations.requests.create');
-Route::post('vacation-requests', 'VacationRequestsController@store')->name('vacations.requests.store');
-Route::get('vacation-requests/{vacation_request}', 'VacationRequestsController@show')->name('vacations.requests.show');
-Route::get('vacation-requests/{vacation_request}/edit', 'VacationRequestsController@edit')->name('vacations.requests.edit');
-Route::put('vacation-requests/{vacation_request}', 'VacationRequestsController@update')->name('vacations.requests.update');
-Route::post('vacation-requests/{vacation_request}/approve', 'VacationRequestsController@approve')->name('vacations.requests.approve');
-Route::delete('vacation-requests/{vacation_request}', 'VacationRequestsController@destroy')->name('vacations.requests.delete');
+Route::group(['middleware' => ['auth']], function () {
+
+    Route::get('users/{user}/vacation-requests', 'VacationRequestsController@user')->name('vacations.requests.user');
+    Route::get('vacation-requests/create', 'VacationRequestsController@create')->name('vacations.requests.create');
+    Route::post('vacation-requests', 'VacationRequestsController@store')->name('vacations.requests.store');
+    Route::get('vacation-requests/{vacation_request}', 'VacationRequestsController@show')->name('vacations.requests.show');
+    Route::get('vacation-requests/{vacation_request}/edit', 'VacationRequestsController@edit')->name('vacations.requests.edit');
+    Route::put('vacation-requests/{vacation_request}', 'VacationRequestsController@update')->name('vacations.requests.update');
+    Route::delete('vacation-requests/{vacation_request}', 'VacationRequestsController@destroy')->name('vacations.requests.delete');
+
+});
 
 Route::group(['middleware' => ['auth', 'admin']], function () {
 
