@@ -93,7 +93,7 @@
         <p>{{ $vacation_request['admin_note'] }}</p>
     </div>
     @endif
-    @if (((auth()->user()->role->slug == $role_slugs['admin']) || auth()->user()->role->slug == $role_slugs['approver']) && $vacation_request['status'] != $status['approved'])
+    @if (((auth()->user()->role->slug == $role_slugs['admin']) || auth()->user()->role->slug == $role_slugs['approver']) && $vacation_request['status'] != $status['approved'] && auth()->id() != $user['id'])
     <div class="form-group">
         <form action="{{ route('vacations.requests.approve', [$vacation_request['id']]) }}" method="POST">
             @csrf

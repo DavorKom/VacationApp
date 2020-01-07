@@ -18,6 +18,7 @@ use App\Http\Resources\RoleResource;
 use App\Http\Resources\TeamResource;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use DavorKom\Logger\LoggerFacade as Log;
 
 
 class UserController extends Controller
@@ -111,6 +112,14 @@ class UserController extends Controller
         $user->save();
 
         event(new CreatedUser($user));
+        Log::emergency('User created!');
+        Log::alert('User created!');
+        Log::critical('User created!');
+        Log::error('User created!');
+        Log::warning('User created!');
+        Log::notice('User created!');
+        Log::info('User created!');
+        Log::debug('User created!');
 
         return redirect()->route('users.index');
     }

@@ -4,8 +4,51 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bac13da16303e1e35cb0c2760bde468b",
+    "content-hash": "2582e48c6d0f8290c6d10f741002ee15",
     "packages": [
+        {
+            "name": "davorkom/logger",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DavorKom/Logger.git",
+                "reference": "33fbefb931eb70a737c35f155df514a1e74912e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DavorKom/Logger/zipball/33fbefb931eb70a737c35f155df514a1e74912e5",
+                "reference": "33fbefb931eb70a737c35f155df514a1e74912e5",
+                "shasum": ""
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "DavorKom\\Logger\\LoggerServiceProvider"
+                    ],
+                    "aliases": {
+                        "LoggerFacade": "DavorKom\\Logger\\LoggerFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DavorKom\\Logger\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "DavorKom",
+                    "email": "komljenovic.davor@gmail.com"
+                }
+            ],
+            "description": "Laravel package for logging.",
+            "time": "2020-01-05T18:03:48+00:00"
+        },
         {
             "name": "dnoegel/php-xdg-base-dir",
             "version": "v0.1.1",
@@ -5060,7 +5103,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "davorkom/logger": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

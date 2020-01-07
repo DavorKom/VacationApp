@@ -35,6 +35,9 @@
                 </tr>
         </tbody>
     </table>
+    <div class="mb-3">
+        <a href="{{ route('vacations.requests.create') }}" class="btn-lg btn-primary text-decoration-none">Create Vacation Request</a>
+    </div>
     <h2>Zahtjevi za godišnji odmor</h2>
     <table class="table">
         <thead>
@@ -57,6 +60,15 @@
                     <td>{{ $vacation_request['status'] }}</td>
                     <th>
                         <a href="{{ route('vacations.requests.show', [$vacation_request['id']]) }}" class="btn btn-primary">Show</a>
+                    </th>
+                    <th>
+                        @if (auth()->id() == $user['id'])
+                            <form action="{{ route('vacations.requests.delete', [$vacation_request['id']]) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        @endif
                     </th>
                 </tr>
                 @endforeach

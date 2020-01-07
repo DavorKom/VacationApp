@@ -292,12 +292,14 @@ class VacationRequestsController extends Controller
                 };
 
                 $vacation_data->unused_vacation -= $vacation_lenght;
+                $vacation_data->used_vacation += $vacation_lenght;
                 $vacation_request->used_vacation += $vacation_lenght;
                 if($request->input('paid_leave')) {
                     $vacation_data->paid_leave += $vacation_lenght;
                     $vacation_request->paid_leave = 1;
                     $vacation_data->unused_vacation += $vacation_lenght;
                     $vacation_request->used_vacation -= $vacation_lenght;
+                    $vacation_data->used_vacation -= $vacation_lenght;
                 };
 
                 $vacation_data->save();
